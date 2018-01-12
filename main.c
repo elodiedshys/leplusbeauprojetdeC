@@ -20,7 +20,9 @@ typedef struct unite{
 	struct unite *suiv; /* liste des unit´et suivantes*/
 } Unite;
 
-typedef Unite* UListe;
+typedef Unite* UListe{
+	int nombre;
+}
 
 typedef struct monde{
 	Unite *plateau[LONG][LARG];
@@ -54,15 +56,27 @@ int creerUnite(char type, Unite * unite){
 	return 1;
 }
 
+void ajoutUniteListe(Uliste liste, Unite *unite){
+	Uliste liste;
+	liste==malloc(sizeof(liste));
+	if(!liste){
+		printf("Memory runs out\n");
+		exit(1);
+	}
+	else{
+		liste->nombre+=1;
+	}
+}
+
 int placerAuMonde (Unite *unite, Monde *monde, int posX, int posY, char couleur){
 	unite->posX = posX;
 	unite->posY = posY;
 	unite->couleur = couleur;
 	monde->plateau[posY][posX]=unite;
 
-	if(strncmp(&couleur, "ROUGE", 4)){
+	if(strcmp(&couleur, "ROUGE")){
 		monde->rouge = unite;//ajout dans une liste chainée joueur
-		unite->suiv = NULL;//pointe sur l'ancien premier
+		unite->suiv = NULL;//pointe sur l'ancien premier élément
 	}
 	else{
 		monde->bleu = unite;
