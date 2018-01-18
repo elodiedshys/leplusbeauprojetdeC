@@ -20,7 +20,7 @@ typedef struct unite{
 typedef Unite * UListe;
 
 typedef struct monde{
-	Unite *plateau[LONG][LARG];
+	Unite *plateau[LARG][LONG];
 	int tour; /* Numero du tour */
 	UListe rouge;
 	UListe bleu; /*Listes des deux joueurs*/
@@ -35,13 +35,13 @@ int placerAuMonde (Unite *unite, Monde *monde, int posX, int posY, char couleur)
 void affichePlateau(Monde monde);
 void deplacerUnite(Unite *unite, Monde *monde, int destX,
 int destY);
-// void enleverUnite(Unite *unite, Monde *monde);
-// int attaquer(Unite *unite, Monde *monde, int posX, int
-// posY);
-// int deplacerOuAttaquer(Unite *unite, Monde *monde, int
-// destX, int destY);
-// void gererDemiTour(char joueur, Monde *monde);
-// void gererTour(Monde *monde);
-// void viderMonde(Monde *monde);
+void enleverUnite(Unite *unite, Monde *monde);
+int attaquer(Unite *unite, Monde *monde, int posX, int
+posY);
+int deplacerOuAttaquer(Unite *unite, Monde *monde, int
+destX, int destY);
+void gererDemiTour(char joueur, Monde *monde);
+void gererTour(Monde *monde);
+void viderMonde(Monde *monde);
 // void gererPartie(void);
 /*BRAVO*/

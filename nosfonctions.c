@@ -7,8 +7,8 @@
 void initializerMonde (Monde * monde){
   int i,j;
   
-  for(i=0;i<LONG;i++){
-    for(j=0;j<LARG;j++){
+  for(i=0;i<LARG;i++){
+    for(j=0;j<LONG;j++){
       monde->plateau[i][j]=NULL;
     }
   }
@@ -19,12 +19,13 @@ void initializerMonde (Monde * monde){
 
 int creerUnite (char type, Unite * unite){
   Unite *new_unite = malloc(sizeof(Unite));
+  // unite=malloc(sizeof(Unite));
   if(new_unite==NULL){
     return 0;
   }
   else{
      new_unite->genre = type;
-     *unite= *new_unite; 
+     *unite= *new_unite;
      return 1;
   }
 }
@@ -38,7 +39,7 @@ int placerAuMonde(Unite * unite, Monde * monde, int posX, int posY, char couleur
   }
 
   else{ 
-  monde->plateau[posY][posX]=unite; 
+  monde->plateau[posX][posY]=unite; 
   unite->posX=posX;
   unite->posY=posY;
   unite->couleur=couleur;
@@ -56,15 +57,18 @@ int placerAuMonde(Unite * unite, Monde * monde, int posX, int posY, char couleur
 
 void affichePlateau(Monde monde) {
   int i, j;
-  for(i=0;i<LONG;i++){
-    for(j=0;j<LARG;j++){
+  for(j=0;j<LONG;j++){
+    for(i=0;i<LARG;i++){
       printf("----");
     }
     printf("-\n");
-    for(j=0;j<LARG;j++){
+    for(i=0;i<LARG;i++){
       printf("|");
       if(monde.plateau[i][j]!=NULL){
-        printf(" * ");
+        if((monde.plateau[i][j])->genre==SERF)
+          printf(" s ");
+        else
+          printf(" g ");
       }
       else{
         printf("   ");
@@ -72,7 +76,7 @@ void affichePlateau(Monde monde) {
     }
     printf("|\n");
   }
-  for(j=0;j<LARG;j++){
+  for(i=0;i<LARG;i++){
     printf("----");
   }
   printf("-\n");
@@ -86,38 +90,238 @@ void deplacerUnite(Unite *unite, Monde *monde, int destX, int destY){
 
   unite->posX = destX;
   unite->posY = destY;
-  monde->plateau[tempY][tempX]=NULL;
-  monde->plateau[destY][destX]=unite;
+  monde->plateau[tempX][tempY]=NULL;
+  monde->plateau[destX][destY]=unite;
 }
 
-// void enleverUnite(Unite *unite, Monde *monde) {
-//   /*contenu de la fonction*/
-// }
+void enleverUnite(Unite *unite, Monde *monde) {
+  int posX,posY;
+  
 
-// int attaquer(Unite *unite, Monde *monde, int posX, int
-// posY) {
-//   /*contenu de la fonction*/
-// }
+  posX = unite->posX;
+  posY = unite->posY;
 
-// int deplacerOuAttaquer(Unite *unite, Monde *monde, int
-// destX, int destY) {
-//   /*contenu de la fonction*/
-// }
+  monde->plateau[posX][posY]=NULL;
 
-// void gererDemiTour(char joueur, Monde *monde) {
-//   /*contenu de la fonction*/
-// }
+      if(unite->couleur==ROUGE){
 
-// void gererTour(Monde *monde) {
-//   /*contenu de la fonction*/
-// }
+        if(monde->rouge==unite){
+          // free(unite);
+          monde->rouge=unite->suiv;
+          unite->suiv=NULL;
+          
+        }
+        else{
+          Unite *reste=malloc(sizeof(Unite));
+          reste=monde->rouge;
+          while(reste->suiv!=unite){
+            reste=reste->suiv;
+          }
+          reste->suiv=unite->suiv;
+          unite->suiv=NULL;
+          // free(unite);
 
-// void viderMonde(Monde *monde) {
-//   /*contenu de la fonction*/
-// }
+        }
+      }
+
+      else{
+        if(monde->bleu==unite){
+          // free(unite);
+          monde->rouge=unite->suiv;
+          unite->suiv=NULL;
+          
+        }
+        else{
+          Unite *reste=malloc(sizeof(Unite));
+          reste=monde->bleu;
+          while(reste->suiv!=unite){
+            reste=reste->suiv;
+          }
+          reste->suiv=unite->suiv;
+          unite->suiv=NULL;
+          // free(unite);
+
+        }
+      }
+}
+
+
+int attaquer(Unite *unite, Monde *monde, int posX, int posY) {
+
+  Unite *cible= monde->plateau[posX][posY];
+
+    if (cible->genre == unite->genre){
+      enleverUnite(cible, monde);
+      printf("Tu as gagné le combat\n");
+      return 1;
+    }
+    else if(cible->genre == SERF && unite->genre == GUERRIER){
+      enleverUnite(cible, monde);
+      printf("Tu as gagné le combat\n");
+      return 1;
+    }
+    else{
+      enleverUnite(unite, monde);
+      printf("Tu as perdu le combat\n");
+      return 0;
+    }
+}
+
+
+int deplacerOuAttaquer(Unite *unite, Monde *monde, int destX, int destY) {
+
+  Unite *cible= monde->plateau[destX][destY];
+
+  int posX=unite->posX;
+  int posY=unite->posY;
+
+
+
+  if(destX>LARG || destY>LONG || destX<0 || destY<0){
+    printf("Case hors du plateau\n");
+    return -1;
+  }
+ 
+
+  else { 
+    if(destX == posX-1 || destX == posX+1 || destX == posX ){
+      if(destY == posY || destY == posY-1 || destY == posY+1){
+        printf("La case est voisine\n");
+        if(cible!=NULL){
+          if(cible->couleur != unite->couleur){
+            if(attaquer(unite, monde, destX, destY)==1){
+              return 2;
+            }
+            else{
+              return 3;
+            }
+          }
+          else{
+            printf("Vous ne pouvez pas attaquer ou aller sur une case occupée par vos propres unités\n");
+            return -3;
+          }
+        }
+        else{
+          deplacerUnite(unite, monde, destX, destY);
+          return 1;
+       }
+      }
+      else{
+        printf("La case n'est pas voisine\n");
+        return -2;
+      }
+    }
+    else{
+      printf("La case n'est pas voisine\n");
+      return -2;
+    }
+  }
+}
+
+
+void gererDemiTour(char joueur, Monde *monde) {
+  Unite *liste;
+  int reponse,destX,destY,finTour;
+  if(joueur == ROUGE){
+    liste=monde->rouge;
+    while(liste!=NULL){
+      affichePlateau(*monde);
+      printf("Type : %c\n", liste->genre);
+      printf("Position : posX : %d , posY :%d\n", liste->posX, liste->posY);
+      printf("Que souhaitez vous faire avec cette unité ?\n");
+      printf("1 : Déplacer; 2 : Attaquer; 3 : Ne rien faire\n");
+      scanf("%d",&reponse);
+
+      switch(reponse){
+
+        case 1 : 
+          printf("Entrez les coordonnées X et Y de la case où vous souhaitez déplacer l'unité\n");
+          scanf("%d %d", &destX,&destY);
+          printf("Cellule à atteindre : (%d;%d)\n",destX,destY);
+          deplacerOuAttaquer(liste,monde,destX,destY);
+        break;
+
+        case 2 : 
+          printf("Entrez les coordonnées X et Y de la case que vous souhaitez attaquer\n");
+          scanf("%d%d", &destX,&destY);
+          if(deplacerOuAttaquer(liste,monde,destX,destY)<0){
+            printf("action impossible\n");
+          }
+          else{
+            deplacerOuAttaquer(liste,monde,destX,destY);
+          }
+          break;
+
+        case 3 : printf("Très bien, vous ne faites rien pour cette unité !\n");
+      }
+      liste=liste->suiv;
+    }
+  }
+  else{
+    liste=monde->bleu;
+    while(liste!=NULL){
+      printf("Type : %c\n", liste->genre);
+      printf("Position : posX : %d , posY : %d\n", liste->posX, liste->posY);
+      printf("Que souhaitez vous faire avec cette unité ?\n");
+      printf("1 : Déplacer; 2 : Attaquer; 3 : Ne rien faire\n");
+      scanf("%d",&reponse);
+
+      switch(reponse){
+
+        case 1 : 
+          printf("Entrez les coordonnées X et Y de la case où vous souhaitez déplacer l'unité\n");
+          scanf("%d%d", &destX,&destY);
+          if(deplacerOuAttaquer(liste,monde,destX,destY)<0){
+            printf("Action impossible\n");
+          }
+          else{
+            printf("L'unite s'est déplacé en (%d,%d)\n",destX,destY);
+          }
+        break;
+
+        case 2 : 
+          printf("Entrez les coordonnées X et Y de la case que vous souhaitez attaquer\n");
+          scanf("%d%d", &destX,&destY);
+          if(deplacerOuAttaquer(liste,monde,destX,destY)<0){
+            printf("action impossible\n");
+          }
+          else{
+            deplacerOuAttaquer(liste,monde,destX,destY);
+          }
+          break;
+
+        case 3 : printf("Très bien, vous ne faites rien pour cette unité !\n");
+      }
+    }
+  }
+  while(finTour!=0){
+    printf("Confirmer la fin de votre tour en entrant 0\n");
+    scanf("%d",&finTour);
+  }
+}
+
+void gererTour(Monde *monde) {
+  gererDemiTour(ROUGE,monde);
+  gererDemiTour(BLEU, monde);
+  monde->tour++;
+}
+
+void viderMonde(Monde *monde) {
+  Unite *listeRouge = monde->rouge;
+  Unite *listeBleu = monde->bleu;
+  while(listeRouge!=NULL){
+    enleverUnite(listeRouge,monde);
+    listeRouge=listeRouge->suiv;
+  }
+  while(listeBleu!=NULL){
+    enleverUnite(listeBleu,monde);
+    listeBleu=listeBleu->suiv;
+  }
+  initializerMonde(monde);
+}
 
 // void gererPartie(void) {
-//   /*contenu de la fonction*/
+//   initializerMonde(monde);
 // }
 
 // /*BRAVO*/
