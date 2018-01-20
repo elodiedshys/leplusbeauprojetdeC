@@ -27,10 +27,7 @@ typedef struct monde{
 } Monde;
 
 void initializerMonde(Monde * monde);
-// Unite *find_last(UListe liste);
-int creerUnite(char type, Unite * unite);
-// void ajoutUniteListe(UListe liste, Unite *unite);
-// int measure(Unite *unite);
+int creerUnite(char type, UListe *nvListe);
 int placerAuMonde (Unite *unite, Monde *monde, int posX, int posY, char couleur);
 void affichePlateau(Monde monde);
 void deplacerUnite(Unite *unite, Monde *monde, int destX,
@@ -43,5 +40,9 @@ destX, int destY);
 void gererDemiTour(char joueur, Monde *monde);
 void gererTour(Monde *monde);
 void viderMonde(Monde *monde);
-// void gererPartie(void);
+void afficherInfosUnite(Unite unite);
+void afficherListe(UListe liste);
+void creerEtPlacer(Monde *monde, UListe *liste);
+int testListeVide(UListe liste);
+void gererPartie(void);
 /*BRAVO*/
